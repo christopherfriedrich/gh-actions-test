@@ -1,0 +1,37 @@
+name: continuous-integration
+
+on:
+  push:
+    branches:
+      - master
+      - feature/*
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building ..."
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building ..."
+    needs: test
+
+  trigger-artifact-to-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: manual-trigger
+        id: manual-trigger
+        uses: benhamiltonpro/manual-trigger@v1
+        with:
+          RUN_NAME: "artifact-to-staging"
+    needs: build
+  
+  artifact-to-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - run: echo "Promoting artifact to staging repository ..."
+  

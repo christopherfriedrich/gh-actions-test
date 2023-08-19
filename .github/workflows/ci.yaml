@@ -35,4 +35,5 @@ jobs:
     if: github.ref == 'refs/heads/master'
     steps:
       - run: echo "Promoting artifact to staging repository ..."
+    needs: trigger-artifact-to-staging
   

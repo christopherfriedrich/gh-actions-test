@@ -8,69 +8,30 @@ on:
       - fix/*
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - run: echo "Building ..."
-
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - run: echo "Building ..."
-  #   needs: test
-
-  # trigger-artifact-to-staging:
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-  #   outputs:
-  #     CONTINUE_JOBS: ${{ steps.manual-trigger.outputs.CONTINUE_JOBS }}
-  #   steps:
-  #     - name: manual-trigger
-  #       id: manual-trigger
-  #       uses: benhamiltonpro/manual-trigger@v1
-  #       with:
-  #         RUN_NAME: "artifact-to-staging"
-  #   needs: build
-  
-  # artifact-to-staging:
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main' && ${{ needs.trigger-artifact-to-staging.outputs.CONTINUE_JOBS == 'true' }}
-  #   steps:
-  #     - run: echo "Promoting artifact to staging repository ..."
-  #   needs: trigger-artifact-to-staging
-  manual-trigger-build:
+  test:
     runs-on: ubuntu-latest
-    outputs:
-        CONTINUE_JOBS: ${{ steps.manual-trigger.outputs.CONTINUE_JOBS }}
     steps:
-      - name: manual-trigger
-        id: manual-trigger
-        uses: benhamiltonpro/manual-trigger@v1
-        with:
-          RUN_NAME: "build"
+      - run: echo "Building ..."
+
   build:
-    needs: manual-trigger-build
-    if: ${{ needs.manual-trigger-build.outputs.CONTINUE_JOBS == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Runs plan
-        run: echo "It runs plan"
+      - run: echo "Building ..."
+    needs: test
 
-  manual-trigger-deploy:
+  artifact-to-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - run: echo "Triggering artifact to staging repository ..."
     needs: build
+    
+  
+  artifact-to-rc:
     runs-on: ubuntu-latest
-    outputs:
-        CONTINUE_JOBS: ${{ steps.manual-trigger.outputs.CONTINUE_JOBS }}
+    if: github.ref == 'refs/heads/main'
+    environment: release-candidate
     steps:
-      - name: manual-trigger
-        id: manual-trigger
-        uses: benhamiltonpro/manual-trigger@v1
-        with:
-          RUN_NAME: "deploy"
-  deploy:
-    needs: manual-trigger-deploy
-    if: ${{ needs.manual-trigger-deploy.outputs.CONTINUE_JOBS == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Runs deploy
-        run: echo "It runs deploy"
+      - run: echo "Promoting artifact to staging repository ..."
+    needs: artifact-to-staging
